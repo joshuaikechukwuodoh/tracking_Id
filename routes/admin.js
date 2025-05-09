@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt'); // Import bcrypt
 
 const { generateTrackingNumber } = require('../utils/trackingGenerator');
-const { db, schema } = require('../db/index.mjs'); // Or ../db/index.mjs if you renamed it
+const { db, schema } = require('../db/index.js');
 const { eq, like } = require('drizzle-orm');
 
 // Middleware to check admin authentication using DB and bcrypt
@@ -88,10 +88,10 @@ router.post('/login', async (req, res) => {
 
 // Create new tracking using DB
 router.post('/tracking', adminAuth, async (req, res) => {
-    console.log('Creating tracking');
+    console.log('Creating tracking - Request body:', JSON.stringify(req.body, null, 2));
     try {
         const trackingNumber = generateTrackingNumber();
-        console.log(req.body);
+        console.log('Generated tracking number:', trackingNumber);
         const {
             shipDate,
             deliveryDate,
@@ -132,14 +132,18 @@ router.post('/tracking', adminAuth, async (req, res) => {
             service
         };
 
-
         const [createdTracking] = await db.insert(schema.trackings)
             .values(newTrackingData)
-            .returning(); // Return the created object
-        console.log(createdTracking);
+            .returning();
+        console.log('Successfully created tracking:', JSON.stringify(createdTracking, null, 2));
         res.status(201).json(createdTracking);
     } catch (error) {
         console.error('Create tracking error:', error);
+        console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
         // Check for specific DB errors if needed (e.g., unique constraint)
         if (error.message.includes('UNIQUE constraint failed')) {
             return res.status(409).json({ message: 'Tracking number conflict or other unique field violation.' });
@@ -179,6 +183,8 @@ router.get('/tracking/:trackingNumber', adminAuth, async (req, res) => {
 
 // Update tracking using DB
 router.put('/tracking/:trackingNumber', adminAuth, async (req, res) => {
+    console.log('Updating tracking - Tracking number:', req.params.trackingNumber);
+    console.log('Update data:', JSON.stringify(req.body, null, 2));
     try {
         const trackingNumber = req.params.trackingNumber;
         const updates = req.body;
@@ -195,14 +201,16 @@ router.put('/tracking/:trackingNumber', adminAuth, async (req, res) => {
         const [updatedTracking] = await db.update(schema.trackings)
             .set(updates)
             .where(eq(schema.trackings.trackingNumber, trackingNumber))
-            .returning(); // Return the updated object
-
-        if (!updatedTracking) {
-            return res.status(404).json({ message: 'Tracking not found' });
-        }
+            .returning();
+        console.log('Successfully updated tracking:', JSON.stringify(updatedTracking, null, 2));
         res.json(updatedTracking);
     } catch (error) {
         console.error('Update tracking error:', error);
+        console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
         res.status(500).json({ message: 'Server error updating tracking' });
     }
 });
@@ -227,7 +235,7 @@ router.delete('/tracking/:trackingNumber', adminAuth, async (req, res) => {
 
 // Search trackings using DB (Example: Search by tracking number or recipient name)
 router.get('/tracking/search/:query', adminAuth, async (req, res) => {
-    try {
+    try { 5
         const query = `%${req.params.query}%`; // Prepare query for LIKE operator
         const results = await db.select()
             .from(schema.trackings)

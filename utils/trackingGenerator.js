@@ -1,4 +1,4 @@
-export const generateTrackingNumber = () => {
+const generateTrackingNumber = () => {
   const prefix = 'SWIFT';
   const length = 8;
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoid ambiguous characters
@@ -10,3 +10,5 @@ export const generateTrackingNumber = () => {
   
   return `${prefix}-${randomPart}`;
 };
+
+module.exports = { generateTrackingNumber };
