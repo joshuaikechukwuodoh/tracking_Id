@@ -1,12 +1,12 @@
-import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
+const { text, integer, sqliteTable } = require("drizzle-orm/sqlite-core");
 
-export const admins = sqliteTable("admins", {
+const admins = sqliteTable("admins", {
   id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
 });
 
-export const trackings = sqliteTable("trackings", {
+const trackings = sqliteTable("trackings", {
   id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
   trackingNumber: text("trackingNumber").notNull().unique(),
   shipDate: integer("shipDate", { mode: "timestamp" }), // Store dates as timestamps (Unix epoch seconds or milliseconds)
@@ -19,4 +19,6 @@ export const trackings = sqliteTable("trackings", {
   status: text("status").notNull(),
   service: text("service").notNull(),
 });
+
+module.exports = { admins, trackings };
 
