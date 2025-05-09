@@ -1,9 +1,18 @@
-import { db, schema } from './db/index.mjs';
-// creat admin admin:admin
-const admin = await db.insert(schema.admins).values({
-    username: 'admin',
-    password: 'admin'
-});
+const { db, schema } = require('./db/index.js');
 
-console.log(admin);
+async function seed() {
+    try {
+        // create admin admin:admin
+        const admin = await db.insert(schema.admins).values({
+            username: 'admin',
+            password: 'admin'
+        });
+
+        console.log('Admin created:', admin);
+    } catch (error) {
+        console.error('Error seeding database:', error);
+    }
+}
+
+seed();
 
